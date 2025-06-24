@@ -31,9 +31,18 @@ parseExpr = parseAtom
 parseString :: Parser LispVal
 parseString = do
                 char '"'
-                x <- many (noneOf "\"")
+                x <- many (noneOf "\\\"" <|> escChar)
                 char '"'
                 return $ String x
+              where escChar = do
+                      char '\\'
+                      c <- oneOf "\\\"nrt"
+                      return $ case c of
+                        '\\' -> '\\'
+                        '"'  -> '"'
+                        'n'  -> '\n'
+                        'r'  -> '\r'
+                        't'  -> '\t'
 
 parseAtom :: Parser LispVal
 parseAtom = do 
